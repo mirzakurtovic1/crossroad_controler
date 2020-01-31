@@ -1,0 +1,63 @@
+ MODULE main
+    VAR 
+        t1_color: {red, yellow, green};
+        t1_pedestrian_color:{red,green};
+        t2_color: {red, yellow, green};
+        t2_pedestrian_color:{red,green};
+
+        curr_light: {t1, t2};
+        time_left_green: 0..50;
+        time_left_yellow: 0..5;
+        time_left_red: 0..2; 
+ ASSIGN
+    init(t1_color) := green;
+    init(t2_color) := red;
+    init(t1_pedestrian_color):=red;
+    init(t2_pedestrian_color):=green;
+    init(curr_light) := t1;
+    init(time_left_green) := 50;
+    init(time_left_yellow) := 5;
+    init(time_left_red) := 2;
+	 
+    next(t1_color) := case
+        (t1_color = red) & (curr_light = t2) & (time_left_red = 0): green;
+        (t1_color = yellow) & (curr_light = t1) & (time_left_yellow = 0): red;
+        (t1_color = green) & (time_left_green = 0): yellow;
+        TRUE: t1_color;
+    esac;
+    next(t2_color) := case
+        (t2_color = red) & (curr_light = t1) & (time_left_red = 0): green;
+        (t2_color = yellow) & (curr_light = t2) & (time_left_yellow = 0): red;
+        (t2_color = green) & (time_left_green = 0): yellow;
+        TRUE: t2_color;
+    esac;
+    next(curr_light) := case
+        (curr_light = t1) & (time_left_red = 0): t2;
+        (curr_light = t2) & (time_left_red = 0): t1;
+        TRUE: curr_light;
+    esac;
+    next(t1_pedestrian_color):=case
+    (t1_color=red) & (time_left_red > 1):green;
+    (t1_color=green) | (t1_color=yellow) | (time_left_red = 1):red;
+    TRUE:t1_pedestrian_color;
+    esac;
+    next(t2_pedestrian_color) :=case
+    (t2_color=red) & (time_left_red > 1):green;
+    (t2_color=green) | (t2_color=yellow) | (time_left_red = 1):red;
+    TRUE:t1_pedestrian_color;
+    esac;
+    next(time_left_green) := case
+        (time_left_green > 0):time_left_green - 1;
+        (time_left_red = 0): 50;
+        TRUE: time_left_green;
+    esac;
+    next(time_left_yellow) := case
+        (time_left_yellow > 0) & (time_left_green = 0): time_left_yellow - 1;
+        (time_left_red = 0): 5;
+        TRUE: time_left_yellow;
+    esac;
+    next(time_left_red) := case
+        (time_left_red > 0) & (time_left_yellow = 0): time_left_red - 1;
+        (time_left_red = 0): 2;
+        TRUE: time_left_red;
+    esac;
